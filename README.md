@@ -7,6 +7,71 @@
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
 </p>
 
+I recently got started with Livewire and I'm in absolute awe. It makes creating dynamic interfaces so easy while sticking to the familiarity of Laravel. Okay, enough praising for now.
+
+I'm writing this article to highlight a slight niche and currently undocumented feature.
+
+# The Scenario
+Okay, consider this: In your component class, you have an array:
+```php
+public $products= [
+        [
+            'id' => '2535230536',
+            'rate' => '32424',
+        ],
+        [
+            'id' => '3960700133',
+            'rate' => '24523',
+        ],
+        [
+            'id' => '0524548004',
+            'rate' => '45574',
+        ],
+    ];
+```
+And in the view, you have the 'id's & 'rates's bound to inputs.
+```html
+@foreach($products as $index => $product)
+<div  wire:key="products-{{ $index }}">
+	<div>
+		<label>ID</label>
+	<input type="text" wire:model="products.{{ $index }}.id">
+	</div>
+	<div>
+		<label>Rate</label>
+		<input type="text" wire:model="products.{{ $index }}.rate">
+	</div>
+</div>
+```
+Now, what if you want to hook a task any time a product ID is updated? Something like if ID was updated, update the rate accordingly.
+
+# The Concerns
+Let's see... Doing something like:
+```php
+public function updatedRooms() {
+        
+}
+```
+This runs every time `$rooms` gets updated. But we want to run as task when any 'id' gets updated not `$rooms` as a whole.
+```php
+public function updatedRooms0Id() {
+        
+}
+```
+This runs every time `$rooms[0]['id']` gets updated. Which works for the first 'id' but... having to repeat the function (`updatedRooms0Id`, `updatedRooms1Id`...) for every index isn't really DRY.
+
+# The Solution
+Wouldn't it be great if only there was a way to access the index? Turns out there is...
+```php
+public function updatedRooms($value, $key) {
+        
+}
+```
+`$key` in our example would return `0.id` if the first ID was updated. The first part before the dot is our index. Which is what we needed! You can now operate on the key to setup tasks you'd like to with something like and if statement.
+
+# That's All Folks!
+And before I go, I'd like to thank [Josh Hanley](https://github.com/joshhanley) for helping me with this solution. I hope this article helps many more out there.
+
 ## About Laravel
 
 Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
